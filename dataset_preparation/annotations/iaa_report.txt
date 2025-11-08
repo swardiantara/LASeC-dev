@@ -1,0 +1,21 @@
+--- Inter-Annotator Agreement (IAA) Report ---
+
+MERGE TASK
+----------
+- Total pairs reviewed by both annotators: 177
+- Simple Agreement: 51.41%
+- Cohen's Kappa: -0.1173
+
+SPLIT TASK
+----------
+- Total rows reviewed by both annotators: 107
+- Simple Agreement: 52.34%
+- Cohen's Kappa: -0.0664
+
+--- Interpretation of Cohen's Kappa (k) ---
+< 0.00: Poor
+0.00 - 0.20: Slight
+0.21 - 0.40: Fair
+0.41 - 0.60: Moderate
+0.61 - 0.80: Substantial
+0.81 - 1.00: Almost Perfect
