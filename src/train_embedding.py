@@ -32,10 +32,10 @@ parser.add_argument('--initial_model_path', default='all-MiniLM-L6-v2',
                     help="Initial model_name_or_path. Default: `all-MiniLM-L6-v2`")
 parser.add_argument('--sampling_strategy', choices=['random', 'distance'], default='random', 
                     help="Sampling strategy to select `k` positive samples. Default: random")
-parser.add_argument('--dataset', default='Drone', 
+parser.add_argument('--dataset', default='MultiSource', 
                     help="Dataset to use for fine-tuning. Default=`Drone`")
-parser.add_argument('--stage', default='both',
-                    help="Whether to fine-tune using both stages, or one. Default: `both`")
+parser.add_argument('--stage', default='one',
+                    help="Whether to fine-tune using both stages, or one. Default: `one`")
 parser.add_argument('--k', type=int, default=10,
                     help="Number of samples to be paired with their template to construct positive pairs. Default: `10`")
 parser.add_argument('--m1', type=float, default=0.4,

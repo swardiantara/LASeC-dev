@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # source ~/miniconda3/bin/activate sbert
-source ~/anaconda3/bin/activate sbert
+# source ~/anaconda3/bin/activate sbert
 initial_models=( all-MiniLM-L6-v2 all-MiniLM-L12-v2 ) # one-crk10-m0.5-e5-b128-L6
 samplings=( random distance )
 num_samples=( 1 3 5 10 )
