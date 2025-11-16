@@ -38,8 +38,8 @@ parser.add_argument('--stage', default='both',
                     help="Whether to fine-tune using both stages, or one. Default: `both`")
 parser.add_argument('--k', type=int, default=10,
                     help="Number of samples to be paired with their template to construct positive pairs. Default: `10`")
-parser.add_argument('--m1', type=float, default=0.5,
-                    help="Margin for the first stage's negative pairs. Default: 0.5")
+parser.add_argument('--m1', type=float, default=0.4,
+                    help="Margin for the first stage's negative pairs. Default: 0.4")
 parser.add_argument('--m2', type=float, default=0.05,
                     help="Margin for the second stage's negative pairs. Default: 0.05")
 parser.add_argument('--batch1', type=int, default=128,
@@ -674,7 +674,7 @@ def main():
     else:
         filename = f"{args.dataset}_2k.log_structured.csv"
     
-    dataset = pd.read_csv(os.path.join('dataset_corrected', filename))[relevant_cols]
+    dataset = pd.read_csv(os.path.join('dataset', filename))[relevant_cols]
     # if args.dataset == 'MultiSource':
     #     dataset['EventId'] = dataset['Source'] + '_' + dataset['EventId']
     # else:
