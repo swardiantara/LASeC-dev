@@ -15,11 +15,11 @@ num_samples=( 1 3 5 10 )
 
 #     python multi_stage_embedding.py --initial_model_path all-MiniLM-L6-v2 --sampling_strategy distance --stage one --k "$k" --push_embedding
 # python multi_stage_embedding.py --initial_model_path all-MiniLM-L6-v2 --sampling_strategy distance --stage one --k "$k" --push_embedding
-
-for model in "${initial_models[@]}"; do
-    for k in "${num_samples[@]}"; do
-        for sampling in "${samplings[@]}"; do
-            python -m src.train_embedding --initial_model_path "$model" --sampling_strategy "$sampling" --stage one --k "$k" --push_embedding
-        done
-    done
-done
+python -m src.train_embedding --initial_model_path all-MiniLM-L6-v2 --sampling_strategy random --stage one --k 10 --template_portion partial --push_embedding
+# for model in "${initial_models[@]}"; do
+#     for k in "${num_samples[@]}"; do
+#         for sampling in "${samplings[@]}"; do
+#             python -m src.train_embedding --initial_model_path "$model" --sampling_strategy "$sampling" --stage one --k "$k" --push_embedding
+#         done
+#     done
+# done
