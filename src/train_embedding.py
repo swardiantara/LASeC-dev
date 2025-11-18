@@ -1,34 +1,15 @@
-import torch
 import time
-import math
 import os
-import gc
-import shutil
 import json
-import logging
-import pickle
 import argparse
 
-import numpy as np
 import pandas as pd
-import torch.nn as nn
-import torch.nn.functional as F
-
-from tqdm import tqdm
 from datetime import datetime
-from torch.utils.data import DataLoader
-from sklearn.metrics.pairwise import cosine_similarity
-from huggingface_hub import HfApi, hf_hub_download, repo_exists
-from sentence_transformers import SentenceTransformer, losses, InputExample
-
 from src.utils_embedding import (
     split_by_template,
     set_seed,
-    SiameseDistanceMetric,
-    ContrastiveLoss,
-    CustomContrastiveLoss
 )
-from src.embedding import GeometricConstrainedLogEmbedding
+from src.embedding import LogEmbedding
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--output_dir', type=str, default='embeddings',
@@ -36,27 +17,19 @@ parser.add_argument('--output_dir', type=str, default='embeddings',
 parser.add_argument('--initial_model_path', default='all-MiniLM-L6-v2',
                     help="Initial model_name_or_path. Default: `all-MiniLM-L6-v2`")
 parser.add_argument('--sampling_strategy', choices=['random', 'distance'], default='random', 
-                    help="Sampling strategy to select `k` positive samples. Default: random")
+                    help="Sampling strategy to select `k` positive samples. Default: `random`")
 parser.add_argument('--dataset', default='MultiSource',
                     help="Dataset to use for fine-tuning. Default=`Drone`")
-parser.add_argument('--stage', default='one',
-                    help="Whether to fine-tune using both stages, or one. Default: `one`")
 parser.add_argument('--k', type=int, default=10,
                     help="Number of samples to be paired with their template to construct positive pairs. Default: `10`")
 parser.add_argument('--template_portion', type=str, choices=['full', 'partial'], default='full',
                     help="The portion of unique templates to use for fine-tuning. Default: `full` (use all templates)")
-parser.add_argument('--m1', type=float, default=0.4,
-                    help="Margin for the first stage's negative pairs. Default: 0.4")
-parser.add_argument('--m2', type=float, default=0.05,
-                    help="Margin for the second stage's negative pairs. Default: 0.05")
-parser.add_argument('--batch1', type=int, default=128,
+parser.add_argument('--margin', type=float, default=0.5,
+                    help="Margin for the first stage's negative pairs. Default: `0.5`")
+parser.add_argument('--batch_size', type=int, default=128,
                     help="Batch size for the first stage. Default: `128`")
-parser.add_argument('--batch2', type=int, default=128,
-                    help="Batch size for the second stage. Default: `128`")
-parser.add_argument('--epoch1', type=int, default=3,
+parser.add_argument('--epoch', type=int, default=5,
                     help="Training iterations for the first stage. Default: `5`")
-parser.add_argument('--epoch2', type=int, default=2,
-                    help="Training iterations for the second stage. Default: `2`")
 parser.add_argument('--seed', type=int, default=42,
                     help="Random seed for reproducibility. Default: `42`")
 parser.add_argument('--push_embedding', action='store_true', help="Whether to push the fine-tuned embeddings to Huggingface.")
@@ -65,27 +38,25 @@ parser.add_argument('--push_embedding', action='store_true', help="Whether to pu
 def main():
     args = parser.parse_args()
     set_seed(args.seed)
-    # select the columns we need
-    # relevant_cols = ['Content', 'EventId', 'EventTemplate']
+    
     if args.dataset == 'Drone':
         filename = "Drone_584.log_structured.csv"
     else:
         filename = f"{args.dataset}_2k.log_structured.csv"
     
     dataset = pd.read_csv(os.path.join('dataset', filename))
-    dataset.drop_duplicates(subset=['Content', 'EventId'])
-    
-    # Initialize and run multi-stage fine-tuning
+    dataset.drop_duplicates(subset=['Content', 'EventTemplate'], inplace=True)
+
+    # Initialize and run fine-tuning
     args_dict = vars(args)
     k = args_dict['k']
-    stage = args_dict['stage'] # `both`, `one`, `two`
     sampling_strategy = args_dict['sampling_strategy']
     initial_model = args_dict['initial_model_path']
-    output_dir = os.path.join(args_dict['output_dir'], f'{args.dataset}-{args.template_portion}', initial_model, f"{sampling_strategy}-k{k}")
+    output_path = os.path.join(args_dict.output_dir, f'{args.dataset}-{args.template_portion}', initial_model, f"{sampling_strategy}-k{k}")
     precomputed_dir = os.path.join(args_dict['output_dir'], f'{args.dataset}-{args.template_portion}', initial_model)
     args_dict['precomputed_dir'] = precomputed_dir
     
-    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(output_path, exist_ok=True)
     
     # check for the dataset portion
     if args.template_portion != 'full':
@@ -126,14 +97,14 @@ def main():
             print(f"Template overlap between train and test: {len(overlap)}")
             if len(overlap) == 0:
                 print("No template leakage - split is valid!")
-                dataset = train_data  # use only training data for fine-tuning
             else:
                 print(f"!WARNING: {len(overlap)} templates appear in both sets!")
+            dataset = train_data  # use only training data for fine-tuning
 
     # return 0
     start_time = time.time()
-    log_embedding = GeometricConstrainedLogEmbedding(args_dict, dataset, sampling_strategy, stage, initial_model, output_dir)
-    log_embedding.multi_stage_fine_tuning(k, args_dict['m1'], args_dict['m2'], args_dict['epoch1'], args_dict['epoch2'], args_dict['batch1'], args_dict['batch2'])
+    log_embedding = LogEmbedding(args_dict, dataset, output_path)
+    log_embedding.fine_tuning()
     
     end_time = time.time()
     elapsed_time = end_time - start_time
@@ -146,7 +117,7 @@ def main():
     args_dict['total_time_seconds'] = elapsed_time
     args_dict['total_time_hms'] = f"{hours}h {minutes}m {seconds:.2f}s"
 
-    with open(os.path.join(output_dir, 'execution_args.json'), "w") as json_file:
+    with open(os.path.join(output_path, 'execution_args.json'), "w") as json_file:
         json.dump(args_dict, json_file, indent=4)
 
 if __name__ == '__main__':

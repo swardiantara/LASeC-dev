@@ -85,34 +85,6 @@ class ContrastiveLoss(nn.Module):
         return losses.mean() if self.size_average else losses.sum()
 
 
-class CustomContrastiveLoss(ContrastiveLoss):
-    def __init__(
-            self,
-            model: SentenceTransformer,
-            distance_metric=SiameseDistanceMetric.EUCLIDEAN,
-            margin: float = 0.5,
-            size_average: bool = True,
-            num_classes: int = 4,
-    ):
-        super(CustomContrastiveLoss, self).__init__(model, distance_metric, margin, size_average)
-        self.num_classes = num_classes
-
-    def forward(self, sentence_features: Iterable[Dict[str, Tensor]], label_distances: Tensor):
-        reps = [self.model(sentence_feature)["sentence_embedding"] for sentence_feature in sentence_features]
-        assert len(reps) == 2
-        rep_anchor, rep_other = reps
-        distances = self.distance_metric(rep_anchor, rep_other)
-        # label_distances = label_distances / (self.num_classes - 1)
-        # margins = self.margin + label_distances # (2.0 - self.margin) *
-        is_positive = (label_distances == 0).float()
-        losses = 0.5 * (
-            is_positive.float() * distances.pow(2) + 
-            (1 - is_positive.float()) * F.relu(label_distances - distances).pow(2)
-        )
-        
-        return losses.mean() if self.size_average else losses.sum()
-
-
 def set_seed(seed: int = 42) -> None:
     """
     Set random seed for reproducibility across numpy, random, torch, and cuda
@@ -203,39 +175,3 @@ def split_by_template(merged_dataset, test_size=0.2, random_state=42,
         print(f"Test set saved to: {output_test}")
     
     return train_df, test_df
-
-
-# Example usage
-if __name__ == "__main__":
-    # Load merged dataset (assuming you have it from previous step)
-    merged_df = pd.read_csv('merged_log_dataset.csv')
-    
-    print(f"Loaded merged dataset: {len(merged_df)} logs\n")
-    
-    # Split by templates (80% train, 20% test)
-    train_data, test_data = split_by_template(
-        merged_df, 
-        test_size=0.2, 
-        random_state=42,
-        output_train='train_dataset.csv',
-        output_test='test_dataset.csv'
-    )
-    
-    # Verify no template leakage
-    train_templates = set(train_data['EventId'].unique())
-    test_templates = set(test_data['EventId'].unique())
-    overlap = train_templates.intersection(test_templates)
-    
-    print(f"\n=== Verification ===")
-    print(f"Template overlap between train and test: {len(overlap)}")
-    if len(overlap) == 0:
-        print("No template leakage - split is valid!")
-    else:
-        print(f"!WARNING: {len(overlap)} templates appear in both sets!")
-    
-    # Display samples
-    print(f"\n=== Training Set Sample ===")
-    print(train_data.head())
-    
-    print(f"\n=== Test Set Sample ===")
-    print(test_data.head())
