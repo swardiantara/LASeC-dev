@@ -52,7 +52,7 @@ def main():
     k = args_dict['k']
     sampling_strategy = args_dict['sampling_strategy']
     initial_model = args_dict['initial_model_path']
-    output_path = os.path.join(args_dict.output_dir, f'{args.dataset}-{args.template_portion}', initial_model, f"{sampling_strategy}-k{k}")
+    output_path = os.path.join(args.output_dir, f'{args.dataset}-{args.template_portion}', initial_model, f"{sampling_strategy}-k{k}")
     precomputed_dir = os.path.join(args_dict['output_dir'], f'{args.dataset}-{args.template_portion}', initial_model)
     args_dict['precomputed_dir'] = precomputed_dir
     
