@@ -138,7 +138,7 @@ class LogEmbedding:
 
             # save to file after finish sampling
             selected_sample = selected_sample.drop(['Content_embedding', 'EventTemplate_embedding'], axis='columns')
-            self._save_selected_sample(selected_sample, selected_sample_path)
+            selected_sample.to_excel(selected_sample_path)
             self._save_log_pairs(positive_pairs, positive_pairs_path)
             self.logger.info(f"Finished constructing positive pairs for sampling scenario={self.sampling_scenario}")
             self.logger.info(f"Saved to {positive_pairs_path}")
@@ -176,15 +176,6 @@ class LogEmbedding:
         
         return positive_pairs, negative_pairs, positive_pairs_path, negative_pairs_path, selected_sample_path
     
-    def _save_selected_sample(self,
-                             selected_sample: pd.DataFrame,
-                             file_name: str):
-        """
-        Save selected sample based on the strategy
-        
-        :param file_name: The path of the file
-        """
-        selected_sample.to_excel(file_name)
 
     def _save_log_pairs(self,
                     sample_pairs: list,
@@ -272,7 +263,7 @@ class LogEmbedding:
             api.create_repo(repo_id=f'swardiantara/{repo_name}', exist_ok=True, repo_type="model")
 
             # copy selected samples and sample pairs to the folder for documentation
-            files_to_move = [selected_sample_path, positive_pairs_path, negative_pairs_path]
+            files_to_move = [selected_sample_path, positive_pairs_path, negative_pairs_path] if self.args['k'] > 0 else [negative_pairs_path]
             # copy each file to the model directory
             for file_name in files_to_move:
                 shutil.copy(file_name, os.path.join(output_path, file_name.split('/')[-1]))
