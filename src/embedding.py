@@ -94,6 +94,7 @@ class LogEmbedding:
         # group by EventTemplate
         grouped = self.dataset.groupby(by='EventTemplate')
         
+        positive_pairs = []
         if os.path.exists(positive_pairs_path):
             self.logger.info(f"Positive pairs for sampling scenario={self.sampling_scenario} is found: {positive_pairs_path}")
             with open(positive_pairs_path, 'r') as f:
@@ -101,7 +102,6 @@ class LogEmbedding:
         elif self.args['k'] > 0:
             self.logger.info(f"Positive pairs for sampling scenario={self.sampling_scenario} is not found. Constructing...")
             # Positive pairs: Templates with their messages
-            positive_pairs = []
             selected_sample = pd.DataFrame()
             for template, group in grouped:
                 # Get template embedding
@@ -205,7 +205,7 @@ class LogEmbedding:
         """
         start_time = time.time()
         # construct pairs
-        positive_pairs, negative_pairs, positive_pairs_path, negative_pairs_path, selected_sample_path, sample_sample_pairs = self.construct_pairs()
+        positive_pairs, negative_pairs, positive_pairs_path, negative_pairs_path, selected_sample_path = self.construct_pairs()
         
         # prepare training samples
         stage_one_examples = []
