@@ -55,6 +55,12 @@ def main():
     output_path = os.path.join(args.output_dir, f'{args.dataset}-{args.template_portion}', initial_model, f"{sampling_strategy}-k{k}")
     precomputed_dir = os.path.join(args_dict['output_dir'], f'{args.dataset}-{args.template_portion}', initial_model)
     args_dict['precomputed_dir'] = precomputed_dir
+    out_model_dir = f"m{args['margin']}-e{args['epoch']}-b{args['batch_size']}"
+    saved_model=os.path.join(output_path, f'{out_model_dir}', 'model.safetensors')
+
+    if os.path.exists(saved_model):
+        print(f"Found existing fine-tuned model at {saved_model}, skipping fine-tuning...")
+        return
     
     os.makedirs(output_path, exist_ok=True)
     
