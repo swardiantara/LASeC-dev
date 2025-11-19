@@ -82,32 +82,34 @@ def main():
     os.environ['TOKENIZERS_PARALLELISM'] = "false"
     args = parser.parse_args()
     set_seed(args.seed)
+
+    sample_order = True if args.sample_order == 'asc' else False
     
     train_started_at = datetime.datetime.now()
     if args.dataset_type == 'sample':
         if args.dataset == 'Drone':
-            dataset = pd.read_csv(os.path.join('dataset', 'Drone_584.log_structured.csv')).sort_values(by='Content', ascending=args.sample_order).reset_index(drop=True)
+            dataset = pd.read_csv(os.path.join('dataset', 'Drone_584.log_structured.csv')).sort_values(by='Content', ascending=sample_order).reset_index(drop=True)
             dataset.rename(columns = {'Content': 'message', 'EventId': 'cluster_id'}, inplace = True)
             labels_true = dataset['cluster_id'].to_list()
         elif args.dataset == 'DroneOvs':
-            dataset = pd.read_csv(os.path.join('dataset', 'DroneOvs_815.log_structured.csv')).sort_values(by='Content', ascending=args.sample_order).reset_index(drop=True)
+            dataset = pd.read_csv(os.path.join('dataset', 'DroneOvs_815.log_structured.csv')).sort_values(by='Content', ascending=sample_order).reset_index(drop=True)
             dataset.rename(columns = {'Content': 'message', 'EventId': 'cluster_id'}, inplace = True)
             labels_true = dataset['cluster_id'].to_list()
         elif str(args.dataset).startswith('Multi'):
-            dataset = pd.read_csv(os.path.join('dataset', f'{args.dataset}_2k.log_structured.csv')).sort_values(by='Content', ascending=args.sample_order).reset_index(drop=True)
+            dataset = pd.read_csv(os.path.join('dataset', f'{args.dataset}_2k.log_structured.csv')).sort_values(by='Content', ascending=sample_order).reset_index(drop=True)
             dataset.rename(columns = {'Content': 'message'}, inplace = True)
             dataset['cluster_id'] = dataset['Source'] + "-" + dataset['EventId']
         elif args.sample_size == 2000:
-            dataset = pd.read_csv(os.path.join('dataset', f'{args.dataset}_2k.log_structured.csv')).sort_values(by='Content', ascending=args.sample_order).reset_index(drop=True)
+            dataset = pd.read_csv(os.path.join('dataset', f'{args.dataset}_2k.log_structured.csv')).sort_values(by='Content', ascending=sample_order).reset_index(drop=True)
             dataset.rename(columns = {'Content': 'message', 'EventId': 'cluster_id'}, inplace = True)
             labels_true = dataset['cluster_id'].to_list()
         elif args.sample_size > 2000:
-            dataset = pd.read_csv(os.path.join('dataset_efficiency', f'{args.dataset}_{args.sample_size}.log_structured.csv')).sort_values(by='Content', ascending=args.sample_order).reset_index(drop=True)
+            dataset = pd.read_csv(os.path.join('dataset_efficiency', f'{args.dataset}_{args.sample_size}.log_structured.csv')).sort_values(by='Content', ascending=sample_order).reset_index(drop=True)
             dataset.rename(columns = {'Content': 'message', 'EventId': 'cluster_id'}, inplace = True)
     elif args.dataset_type == 'full' and args.sample_size != 2000: # efficiency test first time
         out_dir = os.path.join('dataset_efficiency', f'{args.dataset}-{str(args.sample_size)}')
         os.makedirs(out_dir, exist_ok=True)
-        dataset = pd.read_csv(os.path.join(out_dir, f'{args.dataset}_full.log_structured.csv')).sort_values(by='Content', ascending=args.sample_order).reset_index(drop=True).sample(args.sample_size, random_state=args.seed)
+        dataset = pd.read_csv(os.path.join(out_dir, f'{args.dataset}_full.log_structured.csv')).sort_values(by='Content', ascending=sample_order).reset_index(drop=True).sample(args.sample_size, random_state=args.seed)
         dataset.to_csv(os.path.join(out_dir, f'{args.dataset}_{str(args.sample_size)}.log_structured.csv'), index=False)
         with open(os.path.join(out_dir, f'{args.dataset}_{str(args.sample_size)}.log'), 'w') as f:
             f.write('\n'.join(dataset['Content'].to_list()))
@@ -116,7 +118,7 @@ def main():
 
     
     if args.held_out:
-        dataset = get_heldout_sample(args.embedding, args.dataset, dataset).sort_values(by='message', ascending=args.sample_order).reset_index(drop=True)
+        dataset = get_heldout_sample(args.embedding, args.dataset, dataset).sort_values(by='message', ascending=sample_order).reset_index(drop=True)
     
     if args.held_out:
         dataset_scenario = f"HO-{args.dataset}-{str(args.sample_size)}" if args.sample_size > 2000 else f"HO-{args.dataset}"
@@ -162,8 +164,8 @@ def main():
     pred_df = pd.DataFrame()
 
     eval_start_at = datetime.datetime.now()
-    pred_df = get_pred_df(clustering_model.labels_, dataset, args.sample_order)
-    eval_score = evaluation_score(dataset, pred_df, args.sample_order)
+    pred_df = get_pred_df(clustering_model.labels_, dataset, sample_order)
+    eval_score = evaluation_score(dataset, pred_df, sample_order)
     eval_end_at = datetime.datetime.now()
     eval_duration = eval_end_at - eval_start_at
     arguments_dict['eval_start_at'] = str(eval_start_at)
