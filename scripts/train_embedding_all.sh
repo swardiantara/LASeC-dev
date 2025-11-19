@@ -23,3 +23,21 @@ for model in "${initial_models[@]}"; do
         done
     done
 done
+
+initial_models=( all-MiniLM-L6-v2 all-MiniLM-L12-v2 all-mpnet-base-v2 all-distilroberta-v1 ) # effect of different initial models
+samplings=( random )
+num_samples=( 10 )
+
+for model in "${initial_models[@]}"; do
+    for k in "${num_samples[@]}"; do
+        for sampling in "${samplings[@]}"; do
+            python -m src.train_embedding --initial_model_path "$model" --sampling_strategy "$sampling" --k "$k" --push_embedding
+        done
+    done
+done
+
+# train with 80% of data
+model="all-MiniLM-L6-v2"
+sampling="random"
+k=10
+python -m src.train_embedding --initial_model_path "$model" --sampling_strategy "$sampling" --k "$k" --push_embedding --template_portion partial
