@@ -6,7 +6,7 @@ import random
 import argparse
 import numpy as np
 import pandas as pd
-from utils import get_features, get_pred_df, evaluation_score, get_model, save_results, compute_distance_matrix
+from src.utils import get_features, get_pred_df, evaluation_score, get_model, save_results, compute_distance_matrix
 
 
 parser = argparse.ArgumentParser()
