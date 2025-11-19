@@ -86,19 +86,19 @@ def main():
     train_started_at = datetime.datetime.now()
     if args.dataset_type == 'sample':
         if args.dataset == 'Drone':
-            dataset = pd.read_csv(os.path.join('dataset_corrected', 'Drone_584.log_structured.csv')).sort_values(by='Content', ascending=args.sample_order).reset_index(drop=True)
+            dataset = pd.read_csv(os.path.join('dataset', 'Drone_584.log_structured.csv')).sort_values(by='Content', ascending=args.sample_order).reset_index(drop=True)
             dataset.rename(columns = {'Content': 'message', 'EventId': 'cluster_id'}, inplace = True)
             labels_true = dataset['cluster_id'].to_list()
         elif args.dataset == 'DroneOvs':
-            dataset = pd.read_csv(os.path.join('dataset_corrected', 'DroneOvs_815.log_structured.csv')).sort_values(by='Content', ascending=args.sample_order).reset_index(drop=True)
+            dataset = pd.read_csv(os.path.join('dataset', 'DroneOvs_815.log_structured.csv')).sort_values(by='Content', ascending=args.sample_order).reset_index(drop=True)
             dataset.rename(columns = {'Content': 'message', 'EventId': 'cluster_id'}, inplace = True)
             labels_true = dataset['cluster_id'].to_list()
         elif str(args.dataset).startswith('Multi'):
-            dataset = pd.read_csv(os.path.join('dataset_corrected', f'{args.dataset}_2k.log_structured.csv')).sort_values(by='Content', ascending=args.sample_order).reset_index(drop=True)
+            dataset = pd.read_csv(os.path.join('dataset', f'{args.dataset}_2k.log_structured.csv')).sort_values(by='Content', ascending=args.sample_order).reset_index(drop=True)
             dataset.rename(columns = {'Content': 'message'}, inplace = True)
             dataset['cluster_id'] = dataset['Source'] + "-" + dataset['EventId']
         elif args.sample_size == 2000:
-            dataset = pd.read_csv(os.path.join('dataset_corrected', f'{args.dataset}_2k.log_structured.csv')).sort_values(by='Content', ascending=args.sample_order).reset_index(drop=True)
+            dataset = pd.read_csv(os.path.join('dataset', f'{args.dataset}_2k.log_structured.csv')).sort_values(by='Content', ascending=args.sample_order).reset_index(drop=True)
             dataset.rename(columns = {'Content': 'message', 'EventId': 'cluster_id'}, inplace = True)
             labels_true = dataset['cluster_id'].to_list()
         elif args.sample_size > 2000:
