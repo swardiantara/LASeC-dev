@@ -65,9 +65,13 @@ def get_heldout_sample(model_path: str, source_name: str, source_sample: pd.Data
     else:
         # embeddings/MultiSource-full/all-MiniLM-L6-v2/random-k1/random_k1_selected_sample.xlsx
         training_file_path = os.path.join('embeddings', dataset, initial_model, f"{sampling_strategy}-{num_sample}", f'{sampling_strategy}_{num_sample}_selected_sample.xlsx')
-        if not os.path.exists(training_file_path) or num_sample == "k0":
-            print('The training samples file path is not found or k=0!')
-            return source_sample
+        if not os.path.exists(training_file_path):
+            if num_sample == "k0":
+                print("No training samples needed for k0 setting. Use all samples for testing.")
+                return source_sample
+            else:
+                print(f'The training samples file path is not found for {sampling_strategy}-{num_sample}! Skip scenario!')
+                return exit(0)
         
         train_sample = pd.read_excel(training_file_path).reset_index(drop=True)
         train_source = train_sample[train_sample['Source'] == source_name] if not source_name.startswith('Multi') else train_sample
