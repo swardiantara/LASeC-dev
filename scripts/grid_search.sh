@@ -15,7 +15,7 @@ for embedding in "${embeddings[@]}"; do
     for dataset in "${datasets[@]}"; do
         for model in "${models[@]}"; do
             for threshold in "${thresholds[@]}"; do
-                python -m src.lasec --dataset "$dataset" --model "$model" --embedding "$embedding" --threshold "$threshold" --output_dir effect-k
+                python -m src.lasec --dataset "$dataset" --model "$model" --embedding "$embedding" --threshold "$threshold" --output_dir grid-full
                 # python -m src.lasec --dataset "$dataset" --model "$model" --embedding "$embedding" --threshold "$threshold" --output_dir effect-k --held_out
             done
         done
@@ -26,7 +26,7 @@ for embedding in "${embeddings[@]}"; do
         for model in "${models[@]}"; do
             for threshold in "${thresholds[@]}"; do
                 # python -m src.lasec --dataset "$dataset" --model "$model" --embedding "$embedding" --threshold "$threshold" --output_dir effect-k
-                python -m src.lasec --dataset "$dataset" --model "$model" --embedding "$embedding" --threshold "$threshold" --output_dir effect-k --held_out
+                python -m src.lasec --dataset "$dataset" --model "$model" --embedding "$embedding" --threshold "$threshold" --output_dir grid-ho --held_out
             done
         done
     done
