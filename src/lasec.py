@@ -107,9 +107,9 @@ def main():
             dataset = pd.read_csv(os.path.join('dataset_efficiency', f'{args.dataset}_{args.sample_size}.log_structured.csv')).sort_values(by='Content', ascending=sample_order).reset_index(drop=True)
             dataset.rename(columns = {'Content': 'message', 'EventId': 'cluster_id'}, inplace = True)
     elif args.dataset_type == 'full' and args.sample_size != 2000: # efficiency test first time
+        dataset = pd.read_csv(os.path.join('dataset', f'{args.dataset}_2k.log_structured.csv')).sort_values(by='Content', ascending=sample_order).reset_index(drop=True).sample(args.sample_size, random_state=args.seed, replace=True)
         out_dir = os.path.join('dataset_efficiency', f'{args.dataset}-{str(args.sample_size)}')
         os.makedirs(out_dir, exist_ok=True)
-        dataset = pd.read_csv(os.path.join(out_dir, f'{args.dataset}_full.log_structured.csv')).sort_values(by='Content', ascending=sample_order).reset_index(drop=True).sample(args.sample_size, random_state=args.seed)
         dataset.to_csv(os.path.join(out_dir, f'{args.dataset}_{str(args.sample_size)}.log_structured.csv'), index=False)
         with open(os.path.join(out_dir, f'{args.dataset}_{str(args.sample_size)}.log'), 'w') as f:
             f.write('\n'.join(dataset['Content'].to_list()))
