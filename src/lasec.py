@@ -55,6 +55,11 @@ def get_heldout_sample(model_path: str, source_name: str, source_sample: pd.Data
     dataset = model_path.split("-cdk")[0]  # MultiSource-full
     sampling_strategy = 'random' if model_path.split('-')[1][1] == 'r' else 'distance'
     num_sample = model_path.split('-')[2][2:]
+
+    if num_sample == "k0":
+        print("No training samples needed for k0 setting. Use all samples for testing.")
+        return source_sample
+    
     held_out_dir = os.path.join('dataset_heldout', source_name, f"{sampling_strategy}-{num_sample}")
     os.makedirs(held_out_dir, exist_ok=True)
     held_out_file = os.path.join(held_out_dir, f'heldout_{sampling_strategy}_{num_sample}.xlsx')
@@ -66,13 +71,10 @@ def get_heldout_sample(model_path: str, source_name: str, source_sample: pd.Data
         # embeddings/MultiSource-full/all-MiniLM-L6-v2/random-k1/random_k1_selected_sample.xlsx
         training_file_path = os.path.join('embeddings', dataset, initial_model, f"{sampling_strategy}-{num_sample}", f'{sampling_strategy}_{num_sample}_selected_sample.xlsx')
         if not os.path.exists(training_file_path):
-            if num_sample == "k0":
-                print("No training samples needed for k0 setting. Use all samples for testing.")
-                return source_sample
-            else:
-                print(f'The training samples file path is not found for {sampling_strategy}-{num_sample}! Skip scenario!')
-                return exit(0)
+            print(f'The training samples file path is not found for {sampling_strategy}-{num_sample}! Skip scenario!')
+            return exit(0)
         
+        print(f"Loading training samples from {training_file_path} to create held-out dataset...")
         train_sample = pd.read_excel(training_file_path).reset_index(drop=True)
         train_source = train_sample[train_sample['Source'] == source_name] if not source_name.startswith('Multi') else train_sample
         test_sample = source_sample.copy()
@@ -81,6 +83,7 @@ def get_heldout_sample(model_path: str, source_name: str, source_sample: pd.Data
             test_sample.drop(index_to_remove, inplace=True)
         test_sample.to_excel(held_out_file, index=False)
     return test_sample
+
 
 def main():
     os.environ['TOKENIZERS_PARALLELISM'] = "false"
