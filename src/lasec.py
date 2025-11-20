@@ -29,6 +29,7 @@ parser.add_argument('--sample_size', type=int, default=2000,
                     help="Sample size for efficiency test. Default: 2000")
 parser.add_argument('--held_out', action='store_true',
                     help="Whether to run the abstraction on the held-out dataset.")
+parser.add_argument('--device', choices=['cpu', 'cuda'], default='cuda', help="Computing engine. Default: `cuda`")
 parser.add_argument('--overwrite', action='store_true',
                     help="Whether to overwrite existing results.")
 parser.add_argument('--normalize_embedding', action='store_true',
@@ -64,7 +65,7 @@ def get_heldout_sample(model_path: str, source_name: str, source_sample: pd.Data
     else:
         # embeddings/MultiSource-full/all-MiniLM-L6-v2/random-k1/random_k1_selected_sample.xlsx
         training_file_path = os.path.join('embeddings', dataset, initial_model, f"{sampling_strategy}-{num_sample}", f'{sampling_strategy}_{num_sample}_selected_sample.xlsx')
-        if not os.path.exists(training_file_path) or num_sample == 0:
+        if not os.path.exists(training_file_path) or num_sample == "k0":
             print('The training samples file path is not found or k=0!')
             return source_sample
         
@@ -78,10 +79,17 @@ def get_heldout_sample(model_path: str, source_name: str, source_sample: pd.Data
     return test_sample
 
 def main():
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     os.environ['TOKENIZERS_PARALLELISM'] = "false"
     args = parser.parse_args()
     set_seed(args.seed)
+
+    device = torch.device("cpu")
+    if args.device == 'cuda':
+        if torch.cuda.is_available():
+            device = torch.device("cuda")
+        else:
+            print("CUDA is not available. Using CPU instead.")
+            device = torch.device("cpu")
 
     sample_order = True if args.sample_order == 'asc' else False
     

@@ -15,9 +15,6 @@ from sklearn.metrics import adjusted_rand_score, homogeneity_score, completeness
 
 from src.eval_metrics import evaluate, singleton_accuracy, precision_recall_f1
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
 def get_embedding(embedding):
     tokenizer = None
     if embedding == 'sbert':
@@ -39,7 +36,7 @@ def get_embedding(embedding):
     return embedding_model, tokenizer
 
 
-def get_features(dataset, embedding, device=device, normalize_embeddings=False):
+def get_features(dataset, embedding, device, normalize_embeddings=False):
     corpus = dataset['message'].to_list()
     if embedding == 'sbert':
         embedding_model = SentenceTransformer('all-mpnet-base-v2')
