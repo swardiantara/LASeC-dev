@@ -96,7 +96,6 @@ def main():
             device = torch.device("cuda")
         else:
             print("CUDA is not available. Using CPU instead.")
-            device = torch.device("cpu")
 
     sample_order = True if args.sample_order == 'asc' else False
     
