@@ -52,7 +52,7 @@ def set_seed(seed: int = 42) -> None:
 # only when using fine-tuned embedding model
 def get_heldout_sample(model_path: str, source_name: str, source_sample: pd.DataFrame) -> pd.DataFrame:
     initial_model = 'all-MiniLM-L6-v2' if model_path.split('-')[-1] == 'L6' else 'all-MiniLM-L12-v2'
-    dataset = model_path.split("-cdk")[0]  # MultiSource-full
+    dataset = "-".join(model_path.split("-")[:2])  # MultiSource-full
     sampling_strategy = 'random' if model_path.split('-')[1][1] == 'r' else 'distance'
     num_sample = model_path.split('-')[2][2:]
 
