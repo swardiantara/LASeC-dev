@@ -19,7 +19,20 @@ thresholds=( 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1 0.11 0.12 0.13 0.1
 #         done
 #     done
 # done
-embeddings=( MultiSource-full-crk1-m0.5-e5-b128-L6 MultiSource-full-cdk1-m0.5-e5-b128-L6 MultiSource-full-crk3-m0.5-e5-b128-L6 MultiSource-full-cdk3-m0.5-e5-b128-L6 MultiSource-full-crk5-m0.5-e5-b128-L6 MultiSource-full-cdk5-m0.5-e5-b128-L6 MultiSource-full-crk10-m0.5-e5-b128-L6 MultiSource-full-cdk10-m0.5-e5-b128-L6 ) # one-crk10-m0.5-e5-b128-L6 one-crk10-m0.05-e2-b128-L6 one-cdk10-m0.5-e5-b16-v1 
+# embeddings=( MultiSource-full-crk1-m0.5-e5-b128-L6 MultiSource-full-cdk1-m0.5-e5-b128-L6 MultiSource-full-crk3-m0.5-e5-b128-L6 MultiSource-full-cdk3-m0.5-e5-b128-L6 MultiSource-full-crk5-m0.5-e5-b128-L6 MultiSource-full-cdk5-m0.5-e5-b128-L6 MultiSource-full-crk10-m0.5-e5-b128-L6 MultiSource-full-cdk10-m0.5-e5-b128-L6 ) # one-crk10-m0.5-e5-b128-L6 one-crk10-m0.05-e2-b128-L6 one-cdk10-m0.5-e5-b16-v1 
+# for embedding in "${embeddings[@]}"; do
+#     for dataset in "${datasets[@]}"; do
+#         for model in "${models[@]}"; do
+#             for threshold in "${thresholds[@]}"; do
+#                 python -m src.lasec --dataset "$dataset" --model "$model" --embedding "$embedding" --threshold "$threshold" --output_dir grid-ho --held_out
+#             done
+#         done
+#     done
+# done
+
+
+# effect of base embedding models
+embeddings=( all-MiniLM-L6-v2 all-MiniLM-L12-v2 all-mpnet-base-v2 all-distilroberta-v1 MultiSource-full-cdk3-m0.5-e5-b128-L12 MultiSource-full-cdk3-m0.5-e5-b16-base MultiSource-full-cdk3-m0.5-e5-b16-distilroberta )
 for embedding in "${embeddings[@]}"; do
     for dataset in "${datasets[@]}"; do
         for model in "${models[@]}"; do

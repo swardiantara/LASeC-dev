@@ -259,7 +259,7 @@ class LogEmbedding:
         if self.args['push_embedding']:
             # push model to Huggingface
             api = HfApi(token=os.getenv("HF_TOKEN"))
-            repo_name = f'{self.args['dataset']}-{self.args['template_portion']}-c{self.args['sampling_strategy'][0]}k{self.args['k']}-{out_model_dir}-{self.model_path.split('-')[2]}'
+            repo_name = f'{self.args['dataset']}-{self.args['template_portion']}-c{self.args['sampling_strategy'][0]}k{self.args['k']}-{out_model_dir}-{self.model_path.split('-')[-2]}'
             api.create_repo(repo_id=f'swardiantara/{repo_name}', exist_ok=True, repo_type="model")
 
             # copy selected samples and sample pairs to the folder for documentation
