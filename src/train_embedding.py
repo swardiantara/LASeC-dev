@@ -82,6 +82,7 @@ def main():
             if len(overlap) == 0:
                 print("No template leakage - split is valid!")
                 dataset = train_data  # use only training data for fine-tuning
+                print(f"Debug loaded train dataset size for fine-tuning: {len(dataset)}")
             else:
                 print(f"!WARNING: {len(overlap)} templates appear in both sets!")
         else:
@@ -103,12 +104,13 @@ def main():
             print(f"Template overlap between train and test: {len(overlap)}")
             if len(overlap) == 0:
                 print("No template leakage - split is valid!")
+                dataset = train_data  # use only training data for fine-tuning
+                print(f"Debug split train dataset size for fine-tuning: {len(dataset)}")
             else:
                 print(f"!WARNING: {len(overlap)} templates appear in both sets!")
-            dataset = train_data  # use only training data for fine-tuning
 
     # return 0
-    print(f"Debug dataset size for fine-tuning: {len(dataset.size)}")
+    print(f"Debug dataset size for fine-tuning: {len(dataset)}")
     start_time = time.time()
     log_embedding = LogEmbedding(args_dict, dataset, output_path)
     log_embedding.fine_tuning()
