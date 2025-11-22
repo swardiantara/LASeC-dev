@@ -108,6 +108,7 @@ def main():
             dataset = train_data  # use only training data for fine-tuning
 
     # return 0
+    print(f"Debug dataset size for fine-tuning: {len(dataset.size)}")
     start_time = time.time()
     log_embedding = LogEmbedding(args_dict, dataset, output_path)
     log_embedding.fine_tuning()
