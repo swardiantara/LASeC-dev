@@ -107,7 +107,8 @@ def split_by_template(merged_dataset, test_size=0.2, random_state=42,
                       output_train='train_dataset.csv', 
                       output_test='test_dataset.csv'):
     """
-    Split merged log dataset by unique EventTemplates into train and test sets.
+    Split merged log dataset by unique EventTemplates into train and test sets, preserving Source.
+    Performs 80:20 split per Source first, then merges results.
     
     Args:
         merged_dataset (pd.DataFrame): Merged dataset with columns 
@@ -121,36 +122,60 @@ def split_by_template(merged_dataset, test_size=0.2, random_state=42,
         tuple: (train_df, test_df) - Training and test dataframes
     """
     
-    print("=== Splitting Dataset by Unique Templates ===\n")
+    print("=== Splitting Dataset by Template (Per-Source) ===\n")
     
-    # Get unique templates (EventIds)
-    unique_templates = merged_dataset['EventTemplate'].unique()
-    print(f"Total unique templates (EventIds): {len(unique_templates)}")
+    # Get unique sources
+    sources = merged_dataset['Source'].unique()
+    print(f"Number of sources: {len(sources)}")
+    print(f"Sources: {sorted(sources)}\n")
     
-    # Split templates into train and test
-    train_templates, test_templates = train_test_split(
-        unique_templates, 
-        test_size=test_size, 
-        random_state=random_state,
-        shuffle=True
-    )
+    all_train_dfs = []
+    all_test_dfs = []
     
-    print(f"Train templates: {len(train_templates)} ({len(train_templates)/len(unique_templates)*100:.1f}%)")
-    print(f"Test templates: {len(test_templates)} ({len(test_templates)/len(unique_templates)*100:.1f}%)")
+    # Process each source separately
+    for source in sorted(sources):
+        source_data = merged_dataset[merged_dataset['Source'] == source].copy()
+        unique_templates = source_data['EventTemplate'].unique()
+        
+        print(f"Source: {source}")
+        print(f"  Unique templates: {len(unique_templates)}")
+        
+        # Split templates for this source into train and test
+        train_templates, test_templates = train_test_split(
+            unique_templates, 
+            test_size=test_size, 
+            random_state=random_state,
+            shuffle=True
+        )
+        
+        # Split logs based on template membership for this source
+        source_train = source_data[source_data['EventTemplate'].isin(train_templates)].copy()
+        source_test = source_data[source_data['EventTemplate'].isin(test_templates)].copy()
+        
+        print(f"  Train templates: {len(train_templates)} ({len(train_templates)/len(unique_templates)*100:.1f}%)")
+        print(f"  Test templates: {len(test_templates)} ({len(test_templates)/len(unique_templates)*100:.1f}%)")
+        print(f"  Train logs: {len(source_train)}")
+        print(f"  Test logs: {len(source_test)}\n")
+        
+        all_train_dfs.append(source_train)
+        all_test_dfs.append(source_test)
     
-    # Split logs based on template membership
-    train_df = merged_dataset[merged_dataset['EventId'].isin(train_templates)].copy()
-    test_df = merged_dataset[merged_dataset['EventId'].isin(test_templates)].copy()
+    # Merge all per-source train and test sets
+    train_df = pd.concat(all_train_dfs, ignore_index=True)
+    test_df = pd.concat(all_test_dfs, ignore_index=True)
     
-    # Reset indices
-    train_df.reset_index(drop=True, inplace=True)
-    test_df.reset_index(drop=True, inplace=True)
+    print(f"=== Final Split Statistics ===")
+    print(f"Total training logs: {len(train_df)} ({len(train_df)/len(merged_dataset)*100:.1f}%)")
+    print(f"Total test logs: {len(test_df)} ({len(test_df)/len(merged_dataset)*100:.1f}%)")
     
-    print(f"\n=== Split Statistics ===")
-    print(f"Training logs: {len(train_df)} ({len(train_df)/len(merged_dataset)*100:.1f}%)")
-    print(f"Test logs: {len(test_df)} ({len(test_df)/len(merged_dataset)*100:.1f}%)")
+    # Show source distribution in train and test sets
+    print(f"\n=== Training Set - Source Distribution ===")
+    print(train_df['Source'].value_counts().sort_index())
     
-    # Show template statistics
+    print(f"\n=== Test Set - Source Distribution ===")
+    print(test_df['Source'].value_counts().sort_index())
+    
+    # Show template statistics for train set
     print(f"\n=== Training Set - Template Statistics ===")
     train_template_counts = train_df['EventId'].value_counts()
     print(f"Min logs per template: {train_template_counts.min()}")
