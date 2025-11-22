@@ -91,9 +91,11 @@ class LogEmbedding:
         selected_sample_path = os.path.join(self.output_path, f"{self.sampling_scenario}_selected_sample.xlsx")
         positive_pairs_path = os.path.join(self.output_path, f'{self.sampling_scenario}_positive_pairs.json')
         
+        print(f"Debug columns: {self.dataset.columns.tolist()}")
+        print(f"Debug dataset size: {len(self.dataset)}")
         # group by EventTemplate
         grouped = self.dataset.groupby(by='EventTemplate')
-        
+        print(f"Debug number of unique templates: {len(grouped)}")
         positive_pairs = []
         if os.path.exists(positive_pairs_path):
             self.logger.info(f"Positive pairs for sampling scenario={self.sampling_scenario} is found: {positive_pairs_path}")
@@ -134,9 +136,11 @@ class LogEmbedding:
                         'message': row['Content'],
                         'cosine_distance': float(row['distance'])
                     })
+                print(f"Debug sampled {len(sample_messages)} messages for template: {template}")
                 selected_sample = pd.concat([selected_sample, sample_messages], ignore_index=True)
 
             # save to file after finish sampling
+            print(f"Debug columns before saving: {selected_sample.columns.tolist()}")
             selected_sample = selected_sample.drop(['Content_embedding', 'EventTemplate_embedding'], axis='columns')
             selected_sample.to_excel(selected_sample_path)
             self._save_log_pairs(positive_pairs, positive_pairs_path)
