@@ -91,6 +91,7 @@ class LogEmbedding:
         selected_sample_path = os.path.join(self.output_path, f"{self.sampling_scenario}_selected_sample.xlsx")
         positive_pairs_path = os.path.join(self.output_path, f'{self.sampling_scenario}_positive_pairs.json')
         
+        print(f"Debug columns: {self.dataset.columns.tolist()}")
         # group by EventTemplate
         grouped = self.dataset.groupby(by='EventTemplate')
         
