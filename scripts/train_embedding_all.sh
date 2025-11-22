@@ -24,7 +24,7 @@ num_samples=( 0 1 3 5 10 ) # effect of k values
 #     done
 # done
 
-initial_models=( all-MiniLM-L12-v2 all-mpnet-base-v2 all-distilroberta-v1 ) # effect of different initial models
+initial_models=( all-mpnet-base-v2 ) # effect of different initial models
 samplings=( distance )
 num_samples=( 3 )
 
